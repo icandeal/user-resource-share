@@ -123,10 +123,10 @@ object App {
     )
 
 
-    userResShareDf.saveToEs("user_resource_stat_w/user_resource_stat", Map(
-      "es.mapping.id"->"id",
-      "es.write.operation"->"upsert"
-    ))
+//    userResShareDf.saveToEs("user_resource_stat_w/user_resource_stat", Map(
+//      "es.mapping.id"->"id",
+//      "es.write.operation"->"upsert"
+//    ))
 
     val resourceInfoDf = sqlContext.sql("select res_id, explode(split(concat(grade_id_junior,'|' ,grade_id_primary), '\\\\|')) grade_id, coalesce(subject_id,subject) subject_id from rs_resource_info_es")
 
