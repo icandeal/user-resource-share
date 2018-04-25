@@ -39,6 +39,9 @@ object App {
     val sc = new SparkContext(sparkConf)
     val sqlContext = new HiveContext(sc)
 
+    val beginDate = if (args.length>=2) args(1) else LocalDate.now().plusDays(-1).toString
+    val endDate = if (args.length>=3) args(2) else LocalDate.now().toString
+
     import sqlContext.implicits._
 
     def isUpSertRes(url:String) = {
@@ -84,8 +87,7 @@ object App {
     val findChangeDate = new FindChangeDate()
     sqlContext.udf.register("findChangeDate", findChangeDate)
 
-    val now = LocalDate.now().plusDays(-1).toString
-    val actionLogsDf = sqlContext.sql(s"select jid, getUserId(param_json) user_id_json, getResId(param_json) res_id, getShareStatus(param_json) share_status, c_time from sxlogsdb_action_logs where c_date < '$now' and isUpSertRes(url)").filter(
+    val actionLogsDf = sqlContext.sql(s"select jid, getUserId(param_json) user_id_json, getResId(param_json) res_id, getShareStatus(param_json) share_status, c_time from sxlogsdb_action_logs where c_date < '$endDate' and c_date>='$beginDate' and isUpSertRes(url)").filter(
       "res_id != 0 and share_status != -1 and (jid is not null or user_id_json != 0)"
     ).cache()
 
