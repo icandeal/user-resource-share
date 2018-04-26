@@ -6,12 +6,10 @@ import java.util.Properties
 
 import com.etiantian.udf.FindChangeDate
 import org.apache.log4j.LogManager
-import org.apache.spark.sql.api.java.UDF2
 import org.apache.spark.sql.hive.HiveContext
 import org.apache.spark.{SparkConf, SparkContext}
 import org.json.JSONObject
 import org.elasticsearch.spark.sql._
-import org.apache.spark.sql.functions._
 
 import scala.util.Try
 
@@ -42,6 +40,8 @@ object App {
     val beginDate = if (args.length>=2) args(1) else LocalDate.now().plusDays(-1).toString
     val endDate = if (args.length>=3) args(2) else LocalDate.now().toString
 
+    println("beginDate = "+ beginDate + " and endDate = "+endDate)
+
     import sqlContext.implicits._
 
     def isUpSertRes(url:String) = {
@@ -54,14 +54,20 @@ object App {
 
     def getShareStatus(jsonStr:String) = {
       var shareStaus = -1
-      val json = new JSONObject(jsonStr.toLowerCase)
+      var json = new JSONObject()
+      if(Try(new JSONObject(jsonStr.toLowerCase)).isSuccess) {
+        json =new JSONObject(jsonStr.toLowerCase)
+      }
       if (json.has("sharestatus"))
         shareStaus = json.getInt("sharestatus")
       shareStaus
     }
 
     def getResId(jsonStr:String) = {
-      val json = new JSONObject(jsonStr.toLowerCase)
+      var json = new JSONObject()
+      if(Try(new JSONObject(jsonStr.toLowerCase)).isSuccess) {
+        json =new JSONObject(jsonStr.toLowerCase)
+      }
       if (json.has("resid") && Try(json.getLong("resid")).isSuccess) {
         json.getLong("resid")
       }
@@ -71,7 +77,10 @@ object App {
 
 
     def getUserId(jsonStr:String) = {
-      val json = new JSONObject(jsonStr.toLowerCase)
+      var json = new JSONObject()
+      if(Try(new JSONObject(jsonStr.toLowerCase)).isSuccess) {
+        json =new JSONObject(jsonStr.toLowerCase)
+      }
       if (json.has("userid") && Try(json.getLong("userid")).isSuccess) {
         json.getLong("userid")
       }

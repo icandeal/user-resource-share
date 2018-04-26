@@ -5,6 +5,7 @@ import org.apache.spark.sql.expressions.{MutableAggregationBuffer, UserDefinedAg
 import org.apache.spark.sql.types.{StructType, StructField, DataType, IntegerType, StringType}
 
 class FindChangeDate extends UserDefinedAggregateFunction{
+  //输入参数类型
   override def inputSchema: StructType = StructType(Seq(
     StructField("share_status", IntegerType),
     StructField("c_time", StringType)
@@ -15,20 +16,25 @@ class FindChangeDate extends UserDefinedAggregateFunction{
     * @return
     */
 
+  //过程数据类型
   override def bufferSchema: StructType = StructType(Seq(
     StructField("status", IntegerType),
     StructField("c_time", StringType)
   ))
 
+  //输出数据类型
   override def dataType: DataType = StringType
 
+  //数据一致性
   override def deterministic: Boolean = true
 
+  //初始化过程数据
   override def initialize(buffer: MutableAggregationBuffer): Unit = {
     buffer(0) = 3
     buffer(1) = "1971-01-01 00:00:00"
   }
 
+  //执行分区内过程
   override def update(buffer: MutableAggregationBuffer, input: Row): Unit = {
     if (input.getInt(0) != 3){    //新记录共享
       if (buffer.getInt(0) == 3) {   //旧记录不共享，替换
@@ -44,6 +50,8 @@ class FindChangeDate extends UserDefinedAggregateFunction{
     }
   }
 
+
+  //合并分区过程
   override def merge(buffer1: MutableAggregationBuffer, buffer2: Row): Unit = {
     if (buffer2.getInt(0) != 3){    //新记录共享
       if (buffer1.getInt(0) == 3) {   //旧记录不共享，替换
@@ -59,6 +67,7 @@ class FindChangeDate extends UserDefinedAggregateFunction{
     }
   }
 
+  //计算结果
   override def evaluate(buffer: Row): Any = {
     if (buffer.getInt(0) == 3) {
       null
